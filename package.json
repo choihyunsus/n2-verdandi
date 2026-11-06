@@ -1,0 +1,44 @@
+{
+  "name": "n2-verdandi",
+  "version": "1.0.0",
+  "description": "Scoped structural and semantic file graphs with traceable document learning over the common Soul database.",
+  "main": "dist/library.js",
+  "types": "dist/library.d.ts",
+  "bin": {
+    "n2-verdandi": "dist/index.js"
+  },
+  "files": [
+    "dist/",
+    "static/",
+    "LICENSE",
+    "LICENSE-*",
+    "THIRD-PARTY-NOTICES",
+    "README.md",
+    "README.ko.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "npm run build && node --test --test-timeout=30000 tests/*.test.cjs",
+    "build:documents": "npm --prefix node_modules/n2-arachne run build:documents"
+  },
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/choihyunsus/n2-verdandi"
+  },
+  "dependencies": {
+    "n2-arachne": "https://github.com/choihyunsus/n2-arachne/releases/download/v5.0.0/n2-arachne-5.0.0.tgz",
+    "n2-mimir": "https://github.com/choihyunsus/n2-mimir/releases/download/v3.0.3/n2-mimir-3.0.3.tgz",
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "zod": "^4.6.7",
+    "better-sqlite3": "^12.11.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.15",
+    "typescript": "^5.9.3"
+  }
+}

@@ -1,0 +1,31 @@
+N2 Verdandi 1.0.0
+
+Verdandi's graph design, incremental planning, document-learning workflow and
+viewer originate in N2 Daebung, Copyright (c) 2026 N2 AI Family, under the MIT
+license reproduced in LICENSE. The standalone implementation uses scoped Soul
+storage, weighted graph contraction, bounded worker computation and explicit
+document evidence handling.
+
+Runtime dependencies
+
+N2 Arachne 5.0.0 and N2 Mimir 3.0.3
+Copyright 2026 N2 (Hyunsoo Choi)
+Their original custom non-commercial/commercial license texts are reproduced
+in LICENSE-ARACHNE and LICENSE-MIMIR. LICENSE-APACHE accompanies those texts.
+The dependency packages include their own additional component notices.
+The generated archive/PDF helper in tests/document-fixtures.cjs is adapted from
+N2 Arachne 5.0.0 and retains its licensing terms.
+https://github.com/choihyunsus/n2-arachne
+https://github.com/choihyunsus/n2-mimir
+
+D3 7.9.0
+Copyright 2010-2023 Mike Bostock
+static/d3.v7.min.js is the unmodified upstream npm distribution. Its ISC license
+is reproduced in static/LICENSE-D3.
+https://github.com/d3/d3/tree/v7.9.0
+
+The Model Context Protocol TypeScript SDK, Zod and better-sqlite3 are installed
+as dependencies. Their MIT license notices remain in their respective packages.
+https://github.com/modelcontextprotocol/typescript-sdk
+https://github.com/colinhacks/zod
+https://github.com/WiseLibs/better-sqlite3

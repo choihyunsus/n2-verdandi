@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Verdandi — Knowledge Graph</title>
+    <script src="/verdandi/d3.v7.min.js"></script>
+    <style>
+      :root {
+        --bg: #0d1117;
+        --surface: #161b22;
+        --border: #30363d;
+        --text: #e6edf3;
+        --muted: #8b949e;
+        --accent: #58a6ff;
+        --glow: rgba(88, 166, 255, 0.3);
+        --edge-import: #30363d;
+        --edge-semantic: rgba(139, 233, 253, 0.4);
+        --topbar-h: 48px;
+        --ui-font-size: var(--ui-font-size);
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+        overflow: hidden;
+        height: 100vh;
+      }
+
+      /* Top bar */
+      .topbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        min-height: 48px;
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        padding: 6px 12px;
+        z-index: 100;
+        gap: 8px 12px;
+      }
+      .topbar h1 {
+        font-size: var(--ui-font-size);
+        font-weight: 600;
+        background: linear-gradient(135deg, #58a6ff, #79c0ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: 0.5px;
+        flex-shrink: 0;
+      }
+      .topbar .stats {
+        font-size: var(--ui-font-size);
+        color: var(--muted);
+        flex-shrink: 0;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: var(--ui-font-size);
+        flex-shrink: 1;
+        min-width: 0;
+        overflow: hidden;
+      }
+      .breadcrumb span {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 180px;
+      }
+      .breadcrumb span {
+        color: var(--muted);
+        cursor: pointer;
+        transition: color 0.2s;
+      }
+      .breadcrumb span:hover {
+        color: var(--accent);
+      }
+      .breadcrumb .sep {
+        color: var(--border);
+        cursor: default;
+      }
+      .breadcrumb .active {
+        color: var(--text);
+        font-weight: 600;
+        cursor: default;
+      }
+      .btn {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--text);
+        padding: 4px 10px;
+        font-size: var(--ui-font-size);
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.2s;
+        flex-shrink: 0;
+      }
+      .btn:hover {
+        background: var(--border);
+      }
+      .btn:disabled {
+        opacity: 0.3;
+        cursor: default;
+      }
+
+      /* Search */
+      .search-box {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-left: auto;
+        flex-shrink: 0;
+      }
+      .search-box input {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        color: var(--text);
+        padding: 4px 10px;
+        font-size: var(--ui-font-size);
+        border-radius: 6px;
+        width: 180px;
+        max-width: 40vw;
+        outline: none;
+      }
+      .search-box input:focus {
+        border-color: var(--accent);
+      }
+      .search-results {
+        position: fixed;
+        top: var(--topbar-h);
+        right: 16px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        max-height: min(300px, 70vh);
+        overflow-y: auto;
+        z-index: 200;
+        width: min(280px, 90vw);
+        display: none;
+      }
+      .search-results .item {
+        padding: 6px 12px;
+        font-size: var(--ui-font-size);
+        cursor: pointer;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .search-results .item:hover {
+        background: var(--border);
+      }
+      .search-results .item .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+
+      /* Legend */
+      .legend {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 12px 16px;
+        font-size: var(--ui-font-size);
+        z-index: 100;
+        max-height: calc(100vh - 80px);
+        overflow-y: auto;
+      }
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 4px 0;
+        cursor: pointer;
+        transition: opacity 0.2s;
+      }
+      .legend-item.dimmed {
+        opacity: 0.3;
+      }
+      .legend-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+      }
+
+      /* Info panel */
+      .info-panel {
+        position: fixed;
+        top: calc(var(--topbar-h) + 12px);
+        right: 20px;
+        width: min(300px, calc(100vw - 40px));
+        max-height: calc(100vh - 80px);
+        overflow-y: auto;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 16px;
+        font-size: var(--ui-font-size);
+        z-index: 100;
+        display: none;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      }
+      .info-panel .close {
+        position: absolute;
+        top: 8px;
+        right: 12px;
+        cursor: pointer;
+        color: var(--muted);
+        font-size: var(--ui-font-size);
+      }
+      .info-panel h3 {
+        font-size: var(--ui-font-size);
+        color: var(--accent);
+        margin-bottom: 8px;
+        word-break: break-all;
+        padding-right: 20px;
+      }
+      .info-panel .row {
+        display: flex;
+        justify-content: space-between;
+        padding: 4px 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .info-panel .label {
+        color: var(--muted);
+      }
+      .info-panel .value {
+        text-align: right;
+        max-width: 160px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      /* Loading overlay */
+      .loading {
+        position: fixed;
+        top: var(--topbar-h);
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--bg);
+        z-index: 50;
+        color: var(--muted);
+        font-size: var(--ui-font-size);
+      }
+
+      /* Tooltip */
+      .tooltip {
+        position: absolute;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: var(--ui-font-size);
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.15s;
+        z-index: 200;
+        max-width: 300px;
+        word-break: break-all;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+      }
+
+      svg {
+        position: absolute;
+        top: var(--topbar-h);
+        left: 0;
+      }
+      .search-box input[type='range'] {
+        width: 76px;
+        padding: 0;
+      }
+      .search-box label {
+        font-size: var(--ui-font-size);
+        white-space: nowrap;
+      }
+      .btn {
+        min-height: 32px;
+      }
+      .legend {
+        max-height: min(280px, 35vh);
+      }
+      @media (max-width: 640px) {
+        .search-box {
+          margin-left: 0;
+          flex-wrap: wrap;
+        }
+        .legend {
+          left: 10px;
+          bottom: 10px;
+          max-height: 120px;
+          padding: 8px;
+        }
+        .topbar .stats {
+          max-width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="topbar">
+      <h1>Verdandi</h1>
+      <button class="btn" id="btn-back" disabled>← Back</button>
+      <button class="btn" id="btn-refresh">Refresh</button>
+      <div class="breadcrumb" id="breadcrumb">
+        <span class="active" id="bc-root">Overview</span>
+      </div>
+      <div class="stats" id="stats">Loading...</div>
+      <div class="search-box">
+        <label for="font-size">Text size</label>
+        <input
+          type="range"
+          id="font-size"
+          min="12"
+          max="20"
+          value="14"
+          aria-label="Graph text size"
+        />
+        <input
+          type="search"
+          id="search-input"
+          placeholder="Search this view"
+          aria-label="Search graph paths"
+        />
+      </div>
+    </div>
+
+    <div class="legend" id="legend">
+      <div class="legend-item" data-lang="rust">
+        <div class="legend-dot" style="background: #58a6ff"></div>
+        Rust
+      </div>
+      <div class="legend-item" data-lang="typescript">
+        <div class="legend-dot" style="background: #3178c6"></div>
+        TypeScript
+      </div>
+      <div class="legend-item" data-lang="javascript">
+        <div class="legend-dot" style="background: #f1e05a"></div>
+        JavaScript
+      </div>
+      <div class="legend-item" data-lang="html">
+        <div class="legend-dot" style="background: #e34c26"></div>
+        HTML/CSS
+      </div>
+      <div class="legend-item" data-lang="toml">
+        <div class="legend-dot" style="background: #89e051"></div>
+        Config
+      </div>
+      <div class="legend-item" data-lang="other">
+        <div class="legend-dot" style="background: #8b949e"></div>
+        Other
+      </div>
+      <div style="margin-top: 8px; border-top: 1px solid var(--border); padding-top: 8px">
+        <div class="legend-item">
+          <div style="width: 20px; height: 2px; background: var(--edge-import)"></div>
+          Import
+        </div>
+        <div class="legend-item">
+          <div
+            style="
+              width: 20px;
+              height: 2px;
+              background: var(--edge-semantic);
+              border-top: 1px dashed rgba(139, 233, 253, 0.6);
+            "
+          ></div>
+          Semantic
+        </div>
+      </div>
+    </div>
+
+    <div class="info-panel" id="info-panel"></div>
+    <div class="tooltip" id="tooltip"></div>
+    <div class="search-results" id="search-results"></div>
+    <div class="loading" id="loading">Loading graph...</div>
+
+    <script src="/verdandi/graph-ui.js"></script>
+    <script src="/verdandi/graph-render.js"></script>
+    <script src="/verdandi/graph.js"></script>
+  </body>
+</html>
