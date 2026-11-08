@@ -6,7 +6,20 @@
 
 [한국어](README.ko.md)
 
+<p align="center">
+  <img src="https://github.com/choihyunsus/n2-verdandi/raw/refs/heads/main/docs/images/comic.png" alt="Explore related project files as a map and save document knowledge with its source." width="640">
+</p>
+
+Explore related project files as a map and save document knowledge with its source.
+
+A story illustrating the feature, rather than a screenshot of the app.
+
+<details>
+<summary>View the workflow</summary>
+
 ![Read the project → Group related files → Explore in a browser](https://github.com/choihyunsus/n2-verdandi/raw/refs/heads/main/docs/images/overview.svg)
+
+</details>
 
 ## When to use it
 

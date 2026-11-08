@@ -6,7 +6,20 @@
 
 [English](README.md)
 
+<p align="center">
+  <img src="https://github.com/choihyunsus/n2-verdandi/raw/refs/heads/main/docs/images/comic.png" alt="프로젝트 연결 관계가 궁금할 때 → 파일 지도를 만들고 → 연결된 파일을 따라가며 → 원문을 확인합니다." width="640">
+</p>
+
+프로젝트 연결 관계가 궁금할 때 → 파일 지도를 만들고 → 연결된 파일을 따라가며 → 원문을 확인합니다.
+
+기능을 이야기로 표현한 만화입니다. 실제 앱 화면은 아닙니다.
+
+<details>
+<summary>동작 흐름 펼쳐 보기</summary>
+
 ![프로젝트 읽기 → 관련 파일 묶기 → 브라우저에서 탐색](https://github.com/choihyunsus/n2-verdandi/raw/refs/heads/main/docs/images/overview.ko.svg)
+
+</details>
 
 ## 이런 때 사용하세요
 
